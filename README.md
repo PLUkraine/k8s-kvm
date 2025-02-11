@@ -161,7 +161,7 @@ Make sure it has the correct ip address for the master starting with the ip addr
 
 Each node is an incrment of 1 from the master.  Add or delete worker nodes as needed depending on how many you chose.
 
-```toml
+```conf
 [kube-masters]
 master1.kube.local ansible_host=192.168.11.120
 
@@ -282,6 +282,6 @@ You can start with [kubernetes basics tutorial course](https://kubernetes.io/doc
 
 # Improvement Ideas
 
-1. `apt update && apt upgrade` steps take a long time and a bit of network trafic. Use packer to pre-create vagrant image.
+1. `apt upgrade` step takes a long time and a lot of network traffic. Use packer to pre-create vagrant image.
 1. Add a script to run all commands (python setup, install dependensies, run vagrant, run the runbooks)
-1. Port to Ubuntu 24.04
+1. Port to Ubuntu 24.04. Please note that generic/ubuntu2204 is the last official Ubuntu vagrant box

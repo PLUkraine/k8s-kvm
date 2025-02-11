@@ -32,8 +32,8 @@ Vagrant.configure("2") do |config|
       
     config.vm.define "master1" do |master|
         master.vm.box = IMAGE_NAME
-	      master.vm.network :public_network,
-             :dev => "br0",
+        master.vm.network :public_network,
+            :dev => "br0",
             :mode => "bridge",
             :type => "bridge",
             :ip => "#{NETWORK_PREFIX}0"
@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
         config.vm.define "worker-#{i}" do |node|
             node.vm.box = IMAGE_NAME
             node.vm.network :public_network,
-              :dev => "br0",
+                :dev => "br0",
                 :mode => "bridge",
                 :type => "bridge",
                 :ip => "#{NETWORK_PREFIX}#{i}"
