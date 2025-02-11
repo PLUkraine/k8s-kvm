@@ -14,10 +14,12 @@ NETWORK_PREFIX="192.168.11.12"
 #make sure libvirt, qemu, kvm etc are installed
 #make sure other hypervisers such as virtualbox are not
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'libvirt'
-IMAGE_NAME = "generic/ubuntu1804"
+IMAGE_NAME = "generic/ubuntu2204"
 
 #right now NUM_NODES must be under 9
 NUM_NODES = 3 
+
+DISK_SIZE="15GB"
 
 Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
@@ -30,23 +32,25 @@ Vagrant.configure("2") do |config|
       
     config.vm.define "master1" do |master|
         master.vm.box = IMAGE_NAME
-	    master.vm.network :public_network,
+	      master.vm.network :public_network,
              :dev => "br0",
-             :mode => "bridge",
-             :type => "bridge",
-	     :ip => "#{NETWORK_PREFIX}0"
+            :mode => "bridge",
+            :type => "bridge",
+            :ip => "#{NETWORK_PREFIX}0"
         master.vm.hostname = "master"
+        master.vm.disk :disk, size: DISK_SIZE, primary: true
     end
 
     (1..NUM_NODES).each do |i|
         config.vm.define "worker-#{i}" do |node|
             node.vm.box = IMAGE_NAME
-              node.vm.network :public_network,
+            node.vm.network :public_network,
               :dev => "br0",
-              :mode => "bridge",
-              :type => "bridge",
-              :ip => "#{NETWORK_PREFIX}#{i}"
+                :mode => "bridge",
+                :type => "bridge",
+                :ip => "#{NETWORK_PREFIX}#{i}"
             node.vm.hostname = "worker-#{i}"
+            node.vm.disk :disk, size: DISK_SIZE, primary: true
         end
     end
 end

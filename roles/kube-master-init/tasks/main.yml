@@ -1,27 +1,56 @@
-- name: initialize the cluster
-  command: kubeadm init --pod-network-cidr=10.244.0.0/16
-  args:
-    creates: /root/cluster_initialized.txt
-  register: kubeadm_init_raw
-
-- name: save kubeadm init output to a file
+- name: Create an Empty file for Kubeadm configuring
   copy:
-    content: "stdout:\n{{ kubeadm_init_raw.stdout }}\n\nstderr:\n{{ kubeadm_init_raw.stderr }}"
-    dest: /root/cluster_initialized.txt
-  when: kubeadm_init_raw.changed
+    content: ""
+    dest: /etc/kubernetes/kubeadm-config.yaml
+    force: no
 
-- name: create .kube directory
+- name: Configure container runtime
+  blockinfile:
+    path: /etc/kubernetes/kubeadm-config.yaml
+    block: |
+      kind: ClusterConfiguration
+      apiVersion: kubeadm.k8s.io/v1beta3
+      networking:
+        podSubnet: "10.244.0.0/16"
+      ---
+      kind: KubeletConfiguration
+      apiVersion: kubelet.config.k8s.io/v1beta1
+      runtimeRequestTimeout: "15m"
+      cgroupDriver: "systemd"
+      systemReserved:
+        cpu: 100m
+        memory: 350M
+      kubeReserved:
+        cpu: 100m
+        memory: 50M
+      enforceNodeAllocatable:
+      - pods
+
+- name: Initialize the cluster
+  shell: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml >> cluster_initialized.log
+  args:
+    chdir: /home/kube
+    creates: cluster_initialized.log
+
+- name: Create .kube directory
+  become: yes
   file:
     path: /home/kube/.kube
     state: directory
     mode: 0755
     owner: kube
-    group: kube
 
-- name: copy admin.conf to user's kube config
+- name: Copy admin.conf to User's kube config
   copy:
     src: /etc/kubernetes/admin.conf
     dest: /home/kube/.kube/config
     remote_src: yes
     owner: kube
-    group: kube
+
+- name: Install Pod Network
+  become: yes
+  become_user: kube
+  shell: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml >> pod_network_setup.log
+  args:
+    chdir: /home/kube/
+    creates: pod_network_setup.log

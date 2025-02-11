@@ -5,3 +5,4 @@ venv/
 ENV/
 .vagrant
 .vagrant/
+ubuntu-2204
